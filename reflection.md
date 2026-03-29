@@ -6,6 +6,36 @@
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+Answer:
+1. User can add a pet.
+2. User can add a task for all pets or a specific pet.
+3. User can see what tasks they assigned.
+
+The classes that I want to create are a Task class, Pet class, and an Owner class.
+
+1. Task class responsibilities:
+Attributes: Complete, InProgress, Done, taskToDo, Hashmap listOfTasks
+Methods: 
+a. addTask: add a task
+b. deleteTask: delete a task
+c. updateTask: update a specific task
+d. reviewTask: review a specific task
+e. getTasks: return list of tasks (return values of listOfTasks)
+
+2. Pet class responsibilities:
+Attributes: BreedTypes petBreed, List food, Boolean clean
+Methods: 
+a. petInfo: info about the pet
+b. specialNeeds: any special needs that this pet needs
+c. cleanStatus: check if pet is clean or not
+
+3. Owner class responsibilities:
+Attributes: List days, List pets, Int NumberOfPets
+Methods: 
+a. OwnerInfo: info about the owner
+b. DaysAvailable: days that are good for the owner to take care of their pet(s)
+c. updateDayAvailable: updates the days of owner's availability
+d. getPets: return list of owner's pets
 
 **b. Design changes**
 
