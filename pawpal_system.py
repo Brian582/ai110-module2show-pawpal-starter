@@ -26,7 +26,13 @@ class Pet:
     needs: list[str] = field(default_factory=list)
 
     def pet_info(self) -> dict:
-        pass
+        return {
+            "name": self.name,
+            "breed": self.pet_breed.value,
+            "food": self.food,
+            "clean": self.clean,
+            "needs": self.needs,
+        }
 
     def special_needs(self) -> list[str]:
         return self.needs
@@ -44,10 +50,16 @@ class Task:
     priority: int = 1  # 1=low, 2=medium, 3=high
 
     def update_status(self, new_status: TaskStatus):
-        pass
+        self.status = new_status
 
     def review_task(self) -> dict:
-        pass
+        return {
+            "task": self.task_to_do,
+            "pet": self.pet.name,
+            "status": self.status.value,
+            "due_date": self.due_date.isoformat() if self.due_date else None,
+            "priority": self.priority,
+        }
 
 
 @dataclass
@@ -55,13 +67,15 @@ class TaskManager:
     list_of_tasks: list[Task] = field(default_factory=list)
 
     def add_task(self, task: Task):
-        pass
+        self.list_of_tasks.append(task)
 
     def delete_task(self, task: Task):
-        pass
+        self.list_of_tasks.remove(task)
 
     def update_task(self, task: Task, **kwargs):
-        pass
+        for key, value in kwargs.items():
+            if hasattr(task, key):
+                setattr(task, key, value)
 
     def get_tasks(self) -> list[Task]:
         return self.list_of_tasks
@@ -78,13 +92,18 @@ class Owner:
         return len(self.pets)
 
     def owner_info(self) -> dict:
-        pass
+        return {
+            "days_available": self.days,
+            "number_of_pets": self.number_of_pets,
+            "pets": [pet.pet_info() for pet in self.pets],
+        }
 
     def days_available(self) -> list[str]:
         return self.days
 
     def update_day_available(self, day: str):
-        pass
+        if day not in self.days:
+            self.days.append(day)
 
     def get_pets(self) -> list[Pet]:
         return self.pets
@@ -95,10 +114,24 @@ class Scheduler:
     owner: Owner
 
     def build_daily_plan(self, day: str) -> dict:
-        pass
+        if day not in self.owner.days:
+            return {}
+        tasks = self.owner.task_manager.get_tasks()
+        ranked = self.rank_tasks([t for t in tasks if t.status != TaskStatus.DONE])
+        return {
+            "day": day,
+            "tasks": [t.review_task() for t in ranked],
+        }
 
     def explain_plan(self, plan: dict) -> str:
-        pass
+        if not plan:
+            return "No plan available for that day."
+        lines = [f"Plan for {plan['day']}:"]
+        for t in plan.get("tasks", []):
+            lines.append(
+                f"  - [{t['priority']}] {t['task']} for {t['pet']} (due: {t['due_date'] or 'anytime'})"
+            )
+        return "\n".join(lines)
 
     def rank_tasks(self, tasks: list[Task]) -> list[Task]:
-        pass
+        return sorted(tasks, key=lambda t: t.priority, reverse=True)
