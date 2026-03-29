@@ -2,15 +2,17 @@
 
 ## 1. System Design
 
+Core actions:
+Actions user should be able to perform:
+1. Track pet care tasks 
+2. Consider constraints 
+3. Produce a daily plan and explain why it chose that plan
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 Answer:
-1. User can add a pet.
-2. User can add a task for all pets or a specific pet.
-3. User can see what tasks they assigned.
-
 The classes that I want to create are a Task class, Pet class, and an Owner class.
 
 1. Task class responsibilities:
@@ -43,6 +45,10 @@ d. getPets: return list of owner's pets
 - If yes, describe at least one change and why you made it.
 
 ---
+Claude Code made some changes to the skeleton on pawpal_system.py. One of the changes was that it 
+made my Boolean atributes, Complete, in_progress, and done into a single enum type. Now a task can 
+only be in one state at a time.
+
 
 ## 2. Scheduling Logic and Tradeoffs
 
