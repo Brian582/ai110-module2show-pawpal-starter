@@ -41,3 +41,9 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Smarter Scheduling
+
+- **Conflict detection** — `Scheduler.check_conflicts` scans for tasks that share the same due date and surfaces a warning in the plan output, letting the owner spot overloaded days before they happen.
+- **Recurring task automation** — `TaskManager.complete_task` automatically creates the next occurrence of a daily or weekly task when the current one is marked done, so no recurring care item ever falls off the schedule.
+- **Sorting and filtering** — `TaskManager.sort_by_date` returns tasks in chronological order (undated tasks last), and `TaskManager.filter_tasks` lets the UI narrow the list by status or pet name.
