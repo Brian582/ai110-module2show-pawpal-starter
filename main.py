@@ -14,8 +14,9 @@ task2 = Task(task_to_do="Evening playtime", pet=buddy, priority=1, due_date=date
 task3 = Task(task_to_do="Groom and bathe", pet=whiskers, priority=2, due_date=date(2026, 3, 31))
 task4 = Task(task_to_do="Vet checkup", pet=buddy, priority=2, due_date=None)
 task5 = Task(task_to_do="Feed breakfast", pet=whiskers, priority=3, due_date=date(2026, 3, 30))
+task6 = Task(task_to_do="Trim nails", pet=buddy, priority=2, due_date=date(2026, 3, 31))  # conflicts with task3
 
-for task in [task1, task2, task3, task4, task5]:
+for task in [task1, task2, task3, task4, task5, task6]:
     owner.task_manager.add_task(task)
 
 # Mark one task done for filtering demo

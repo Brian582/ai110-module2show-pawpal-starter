@@ -177,14 +177,19 @@ class Scheduler:
     owner: Owner
 
     def build_daily_plan(self, day: str) -> dict:
-        """Build and return a ranked task plan for the given day."""
+        """Build and return a ranked task plan for the given day.
+
+        Includes a 'warnings' key with any scheduling conflict messages.
+        """
         if day not in self.owner.days:
             return {}
         tasks = self.owner.task_manager.get_tasks()
-        ranked = self.rank_tasks([t for t in tasks if t.status != TaskStatus.DONE])
+        active = [t for t in tasks if t.status != TaskStatus.DONE]
+        ranked = self.rank_tasks(active)
         return {
             "day": day,
             "tasks": [t.review_task() for t in ranked],
+            "warnings": self.check_conflicts(active),
         }
 
     def explain_plan(self, plan: dict) -> str:
@@ -196,8 +201,32 @@ class Scheduler:
             lines.append(
                 f"  - [{t['priority']}] {t['task']} for {t['pet']} (due: {t['due_date'] or 'anytime'})"
             )
+        for warning in plan.get("warnings", []):
+            lines.append(f"  ! {warning}")
         return "\n".join(lines)
 
     def rank_tasks(self, tasks: list[Task]) -> list[Task]:
         """Return tasks sorted by priority from highest to lowest."""
         return sorted(tasks, key=lambda t: t.priority, reverse=True)
+
+    def check_conflicts(self, tasks: list[Task]) -> list[str]:
+        """Return a list of warning messages for tasks sharing the same due date.
+
+        Tasks with no due date are ignored. Both same-pet and cross-pet conflicts
+        are detected. The program continues normally — no exception is raised.
+        """
+        by_date: dict[date, list[Task]] = {}
+        for task in tasks:
+            if task.due_date is not None:
+                by_date.setdefault(task.due_date, []).append(task)
+
+        warnings = []
+        for due, group in by_date.items():
+            if len(group) > 1:
+                descriptions = ", ".join(
+                    f'"{t.task_to_do}" ({t.pet.name})' for t in group
+                )
+                warnings.append(
+                    f"WARNING: Scheduling conflict on {due.isoformat()} — {descriptions}"
+                )
+        return warnings
