@@ -84,11 +84,19 @@ else:
         else:
             st.error("Task description cannot be empty.")
 
-    # Show all pending/in-progress tasks
-    all_tasks = owner.task_manager.get_tasks()
-    visible_tasks = [t for t in all_tasks if t.status != TaskStatus.DONE]
+    # Show all pending/in-progress tasks, sorted by due date via TaskManager
+    sorted_tasks = owner.task_manager.sort_by_date()
+    visible_tasks = [t for t in sorted_tasks if t.status != TaskStatus.DONE]
     if visible_tasks:
-        st.write("Current tasks:")
+        # Surface conflicts ABOVE the table so a pet owner sees them immediately
+        scheduler = Scheduler(owner=owner)
+        conflicts = scheduler.check_conflicts(visible_tasks)
+        if conflicts:
+            for conflict in conflicts:
+                # Strip the baked-in "WARNING: " prefix — st.warning provides the visual cue
+                st.warning(conflict.replace("WARNING: ", "", 1))
+            st.caption("Tip: reschedule one of the conflicting tasks to a different date to avoid overloading your day.")
+        st.caption("Tasks sorted by due date — soonest first, no-date tasks at the bottom.")
         st.table([t.review_task() for t in visible_tasks])
     else:
         st.info("No tasks yet. Add one above.")
@@ -118,7 +126,16 @@ if st.button("Generate schedule"):
         st.warning(f"You haven't marked yourself available on {selected_day}. Click 'Mark me available' first.")
     else:
         scheduler = Scheduler(owner=owner)
-        # build_daily_plan returns ranked non-done tasks for the day
         plan = scheduler.build_daily_plan(selected_day)
-        # explain_plan turns the dict into a human-readable string
-        st.text(scheduler.explain_plan(plan))
+        if not plan or not plan.get("tasks"):
+            st.info("No active tasks to schedule for that day.")
+        else:
+            # Show conflicts first — a pet owner needs to act on these before the day begins
+            conflicts = plan.get("warnings", [])
+            if conflicts:
+                for conflict in conflicts:
+                    st.error(conflict.replace("WARNING: ", "", 1))
+                st.caption("Resolve these conflicts before the day starts by rescheduling one of the affected tasks.")
+
+            st.success(f"Plan for {plan['day']} — {len(plan['tasks'])} task(s), ranked by priority.")
+            st.table(plan["tasks"])
