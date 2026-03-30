@@ -89,6 +89,31 @@ class TaskManager:
         """Return all tasks in the task list."""
         return self.list_of_tasks
 
+    def filter_tasks(
+        self,
+        status: TaskStatus | None = None,
+        pet_name: str | None = None,
+    ) -> list[Task]:
+        """Return tasks filtered by completion status and/or pet name.
+
+        Both filters are optional and can be combined. If neither is provided,
+        all tasks are returned.
+        """
+        results = self.list_of_tasks
+        if status is not None:
+            results = [t for t in results if t.status == status]
+        if pet_name is not None:
+            results = [t for t in results if t.pet.name == pet_name]
+        return results
+
+    def sort_by_date(self, reverse: bool = False) -> list[Task]:
+        """Return tasks sorted by due date. Tasks with no due date are placed last."""
+        return sorted(
+            self.list_of_tasks,
+            key=lambda t: (t.due_date is None, t.due_date),
+            reverse=reverse,
+        )
+
 
 @dataclass
 class Owner:
