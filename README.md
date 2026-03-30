@@ -42,6 +42,16 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
+## Features
+
+- **Chronological sorting** — `TaskManager.sort_by_date` orders tasks by due date ascending using a tuple sort key `(due_date is None, due_date)`, so undated tasks always fall to the bottom of the list.
+- **Conflict warnings** — `Scheduler.check_conflicts` groups active tasks by due date into a dictionary and emits a warning message for every date that contains more than one task, catching both same-pet and cross-pet pile-ups before the day begins.
+- **Priority-ranked scheduling** — `Scheduler.rank_tasks` sorts active tasks by the integer `priority` field (1 = low → 3 = high) in descending order so the daily plan always leads with the most urgent care items.
+- **Daily/weekly recurrence** — `TaskManager.complete_task` marks a task `DONE` and immediately appends a new `PENDING` copy with the due date bumped forward by one day (`timedelta(days=1)`) for daily tasks or seven days (`timedelta(weeks=1)`) for weekly tasks, copying all other task attributes unchanged.
+- **Status and pet filtering** — `TaskManager.filter_tasks` narrows the task list by `TaskStatus` and/or pet name; both filters are optional and composable, returning all tasks when neither is supplied.
+- **Daily plan generation** — `Scheduler.build_daily_plan` checks owner availability, removes `DONE` tasks, runs the priority ranker, and bundles the ranked task list with any conflict warnings into a single plan dictionary.
+- **Human-readable plan output** — `Scheduler.explain_plan` converts a plan dictionary into a formatted string that lists each task with its priority, description, pet name, and due date, plus any conflict warnings appended at the end.
+
 ## Smarter Scheduling
 
 - **Conflict detection** — `Scheduler.check_conflicts` scans for tasks that share the same due date and surfaces a warning in the plan output, letting the owner spot overloaded days before they happen.
@@ -57,3 +67,4 @@ My tests demonstrate the following:
 3. The last test schedules two tasks on the same date and makes sure that one warning is returned containing that date.
 
 Confidence level: 4
+
