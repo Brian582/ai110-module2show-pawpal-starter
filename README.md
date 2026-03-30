@@ -47,3 +47,13 @@ pip install -r requirements.txt
 - **Conflict detection** — `Scheduler.check_conflicts` scans for tasks that share the same due date and surfaces a warning in the plan output, letting the owner spot overloaded days before they happen.
 - **Recurring task automation** — `TaskManager.complete_task` automatically creates the next occurrence of a daily or weekly task when the current one is marked done, so no recurring care item ever falls off the schedule.
 - **Sorting and filtering** — `TaskManager.sort_by_date` returns tasks in chronological order (undated tasks last), and `TaskManager.filter_tasks` lets the UI narrow the list by status or pet name.
+
+## Testing PawPal  
+python -m pytest
+
+My tests demonstrate the following:
+1. When tasks are added out of order, they are returned in returned in chronological order. 
+2. When a daily task is completed, the test checks that a new task is created for the following day and that recurrence="daily" and status=PENDING.
+3. The last test schedules two tasks on the same date and makes sure that one warning is returned containing that date.
+
+Confidence level: 4
