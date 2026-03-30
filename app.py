@@ -1,6 +1,15 @@
 import streamlit as st
+from pawpal_system import Owner, Pet, Task
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
+
+# --- Session state vault ---
+# Only create these objects on the FIRST run. Every subsequent rerun reuses them.
+if "owner" not in st.session_state:
+    st.session_state.owner = Owner()
+
+if "pet" not in st.session_state:
+    st.session_state.pet = None  # set when the user fills in pet details
 
 st.title("🐾 PawPal+")
 
