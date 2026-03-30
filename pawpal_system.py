@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import date
+from datetime import date, timedelta
 
 
 class BreedTypes(Enum):
@@ -51,6 +51,7 @@ class Task:
     status: TaskStatus = TaskStatus.PENDING
     due_date: date | None = None
     priority: int = 1  # 1=low, 2=medium, 3=high
+    recurrence: str | None = None  # "daily", "weekly", or None
 
     def update_status(self, new_status: TaskStatus):
         """Update the task's status to the given TaskStatus value."""
@@ -64,6 +65,7 @@ class Task:
             "status": self.status.value,
             "due_date": self.due_date.isoformat() if self.due_date else None,
             "priority": self.priority,
+            "recurrence": self.recurrence,
         }
 
 
@@ -105,6 +107,28 @@ class TaskManager:
         if pet_name is not None:
             results = [t for t in results if t.pet.name == pet_name]
         return results
+
+    def complete_task(self, task: Task) -> Task | None:
+        """Mark a task as DONE and, if it recurs, add the next occurrence.
+
+        Returns the newly created Task for daily/weekly tasks, or None if the
+        task has no recurrence.
+        """
+        task.update_status(TaskStatus.DONE)
+        if task.recurrence not in ("daily", "weekly"):
+            return None
+        base = task.due_date if task.due_date else date.today()
+        delta = timedelta(days=1) if task.recurrence == "daily" else timedelta(weeks=1)
+        next_task = Task(
+            task_to_do=task.task_to_do,
+            pet=task.pet,
+            status=TaskStatus.PENDING,
+            due_date=base + delta,
+            priority=task.priority,
+            recurrence=task.recurrence,
+        )
+        self.add_task(next_task)
+        return next_task
 
     def sort_by_date(self, reverse: bool = False) -> list[Task]:
         """Return tasks sorted by due date. Tasks with no due date are placed last."""
